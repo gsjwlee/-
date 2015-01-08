@@ -1,0 +1,161 @@
+#include <stdio.h>
+#include <stdlib.h>
+/* 노드를 새로 할당 / 노드를 원하는 위치에 삽입 / 순환하는 노드 / 앞에도 노드 / 노드 제거 기능 / 기준점 marker_node */
+struct Node
+{
+	int data;
+	struct Node *nextNode;
+	struct Node *prevNode;
+};
+struct Node first_node(struct Node *Node_arr, int *node_data, struct Node *marker_node);
+struct Node insert_node(int *insert_location, struct Node *marker_node);
+struct Node delete_node(int *delete_location, struct Node *marker_node);
+int node_check(struct Node *marker_node);
+int main()
+{
+	int node_data, i;
+	int insert_location, delete_location;
+	struct Node *Node_arr;
+	struct Node *marker_node;
+	printf("첫 번째 데이터를 입력합니다. \n입력하려는 데이터 값은 얼마입니까? : ");
+	scanf("%d", &node_data);
+	Node_arr=(struct Node *)malloc(sizeof(struct Node));
+	marker_node=Node_arr;
+	first_node(Node_arr, &node_data, marker_node);
+	node_check(marker_node);
+	for(;;)
+	{
+		printf("수행하려는 작업은 무엇입니까? 기준점은 Data No.1 입니다. \n 1. 데이터 삽입\n 2. 데이터 제거 \n 3. 데이터 조회\n 4. 종료  : ");
+		scanf("%d", &i);
+		if(i==1)
+		{
+			printf("삽입하려는 위치를 입력하십시오. 음수는 입력 불가합니다. : ");
+			scanf("%d", &insert_location);
+			insert_node(&insert_location, marker_node);
+			node_check(marker_node);		
+		}
+		else if(i==2)
+		{
+			printf("지우려는 데이터를 입력하십시오. 음수는 입력할 수 없습니다.");
+			scanf("%d", &delete_location);
+			delete_node(&delete_location, marker_node);
+			node_check(marker_node);
+		}
+		else if(i==3)
+		{
+			node_check(marker_node);
+		}
+		else if(i==4)
+		{
+			printf("연산이 종료됩니다. \n");
+			break;
+		}
+		else
+		{
+			printf("잘못된 연산입니다. \n");
+		}
+
+
+	}
+
+	return 0;
+}
+int node_check(struct Node *marker_node)
+{
+	int i=0;
+	struct Node *location;
+	location=marker_node;
+	printf("데이터 값을 점검합니다. \n");
+	for(;;)
+	{
+		printf("Data No.%d = %d \n", i+1,location->data);
+		i++;
+		if(location->nextNode==marker_node)
+		{
+			break;
+		}
+		else
+		{
+			location=location->nextNode;	
+		}
+	}
+	printf("데이터 값 점검 끝 \n");
+	return 0;
+}
+struct Node first_node(struct Node *Node_arr, int *node_data, struct Node *marker_node)
+{
+	int i;
+	Node_arr->data=*node_data;
+	Node_arr->nextNode=Node_arr;
+	Node_arr->prevNode=Node_arr;
+	return *marker_node;
+}
+struct Node insert_node(int *insert_location, struct Node *marker_node)
+{
+	int data_add;
+	int i=0;
+	struct Node *new_location;
+	struct Node *temp_location;
+	printf("추가하려는 변수 data 의 값은 얼마입니까? : ");
+	scanf("%d", &data_add);
+	new_location=(struct Node *)malloc(sizeof(struct Node));
+	new_location->data=data_add;
+	if(*insert_location>0)
+	{
+		temp_location=marker_node;
+		for(i=0;i<*insert_location;i++)
+		{
+			temp_location=temp_location->nextNode;
+		}
+		new_location->nextNode=temp_location;
+		new_location->prevNode=temp_location->prevNode;
+		(temp_location->prevNode)->nextNode=new_location;
+		temp_location->prevNode=new_location;
+	}
+	else if(*insert_location==0)
+	{
+		temp_location=marker_node;
+		marker_node=new_location;
+		new_location->nextNode=temp_location;
+		new_location->prevNode=temp_location->prevNode;
+		(temp_location->prevNode)->nextNode=new_location;
+		temp_location->prevNode=new_location;
+	}
+	else
+	{
+		printf("음수는 입력할 수 없습니다. \n");
+		free(new_location);
+	}
+	return *marker_node;
+}
+struct Node delete_node(int *delete_location, struct Node *marker_node)
+{
+	struct Node *temp_location1, *temp_location2;
+	int i;
+	temp_location1=marker_node->nextNode;
+	temp_location2=marker_node->prevNode;
+	if(delete_location<0)
+	{
+		printf("음수는 입력할 수 없습니다. \n");
+	}
+	else if(delete_location==0)
+	{
+		free(marker_node);
+		marker_node=temp_location1;
+		temp_location1->prevNode=marker_node;
+		temp_location2->nextNode=marker_node;
+	}
+	else
+	{
+		for(i=0;i<*delete_location-1;i++)
+		{
+			temp_location1=temp_location1->nextNode;
+		}
+		temp_location2=temp_location1->prevNode;
+		temp_location2->nextNode=temp_location1->nextNode;
+		temp_location2=temp_location1->nextNode;
+		temp_location2->prevNode=temp_location1->prevNode;
+		free(temp_location1);
+	}
+	return *marker_node;
+}
